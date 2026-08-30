@@ -1,4 +1,5 @@
 <title>Cochon Mange-Maïs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <style>
   :root{
     --room-a:#1b1720;
@@ -77,7 +78,40 @@
     aspect-ratio:800/480;
     border-radius:6px;
     background:#6ec6ff;
+    touch-action:none;
   }
+
+  .touch-controls{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    z-index:6;
+  }
+  .touch-btn{
+    width:15vw;
+    height:15vw;
+    max-width:60px;
+    max-height:60px;
+    min-width:44px;
+    min-height:44px;
+    border-radius:50%;
+    background:rgba(15,10,20,0.45);
+    border:2px solid rgba(255,255,255,0.4);
+    color:#fff;
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:none;
+    user-select:none;
+    cursor:pointer;
+  }
+  .touch-btn:active{ background:rgba(244,197,66,0.6); border-color:rgba(244,197,66,0.8); }
 
   .overlay{
     position:absolute;
@@ -215,6 +249,11 @@
 
     <div class="screen-bezel">
       <canvas id="game" width="800" height="480"></canvas>
+
+      <div class="touch-controls">
+        <button type="button" class="touch-btn" id="upBtn" aria-label="Monter">▲</button>
+        <button type="button" class="touch-btn" id="downBtn" aria-label="Descendre">▼</button>
+      </div>
 
       <div class="overlay" id="startOverlay">
         <div class="overlay-inner">
@@ -559,6 +598,17 @@
   document.getElementById("restartBtn").addEventListener("click", startGame);
   document.getElementById("resumeBtn").addEventListener("click", resumeGame);
   document.getElementById("quitBtn").addEventListener("click", quitToMenu);
+
+  function bindHold(el, onDown, onUp){
+    el.addEventListener("pointerdown", function(e){ e.preventDefault(); onDown(); });
+    el.addEventListener("pointerup", function(e){ e.preventDefault(); onUp(); });
+    el.addEventListener("pointerleave", onUp);
+    el.addEventListener("pointercancel", onUp);
+  }
+  bindHold(document.getElementById("upBtn"),
+    function(){ keys.up = true; }, function(){ keys.up = false; });
+  bindHold(document.getElementById("downBtn"),
+    function(){ keys.down = true; }, function(){ keys.down = false; });
 
   function drawBackground(t){
     var sky = ctx.createLinearGradient(0,0,0,H);
