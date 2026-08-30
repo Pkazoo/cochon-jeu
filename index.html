@@ -92,17 +92,11 @@
     touch-action:none;
   }
 
-  .touch-controls{
+  .touch-btn{
     position:absolute;
-    right:14px;
     top:50%;
     transform:translateY(-50%);
-    display:flex;
-    flex-direction:column;
-    gap:14px;
     z-index:6;
-  }
-  .touch-btn{
     width:15vw;
     height:15vw;
     max-width:60px;
@@ -123,6 +117,8 @@
     cursor:pointer;
   }
   .touch-btn:active{ background:rgba(244,197,66,0.6); border-color:rgba(244,197,66,0.8); }
+  #upBtn{ left:14px; }
+  #downBtn{ right:14px; }
 
   .overlay{
     position:absolute;
@@ -307,10 +303,8 @@
     <div class="screen-bezel">
       <canvas id="game" width="800" height="480"></canvas>
 
-      <div class="touch-controls">
-        <button type="button" class="touch-btn" id="upBtn" aria-label="Monter">▲</button>
-        <button type="button" class="touch-btn" id="downBtn" aria-label="Descendre">▼</button>
-      </div>
+      <button type="button" class="touch-btn" id="upBtn" aria-label="Monter">▲</button>
+      <button type="button" class="touch-btn" id="downBtn" aria-label="Descendre">▼</button>
 
       <div class="overlay" id="startOverlay">
         <div class="overlay-inner">
