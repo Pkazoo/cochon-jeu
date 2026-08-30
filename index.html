@@ -1,5 +1,13 @@
 <title>Cochon Mange-Maïs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1b1720">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cochon">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiQ29jaG9uIE1hbmdlLU1hw69zIiwic2hvcnRfbmFtZSI6IkNvY2hvbiIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMWIxNzIwIiwidGhlbWVfY29sb3IiOiIjMWIxNzIwIiwib3JpZW50YXRpb24iOiJsYW5kc2NhcGUiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhkcFpIUm9QU0l4T1RJaUlHaGxhV2RvZEQwaU1Ua3lJajQ4Y21WamRDQjNhV1IwYUQwaU1Ua3lJaUJvWldsbmFIUTlJakU1TWlJZ2NuZzlJak15SWlCbWFXeHNQU0lqTXpNeVl6TmtJaTgrUEhSbGVIUWdlRDBpT1RZaUlIazlJakV4T0NJZ1ptOXVkQzF6YVhwbFBTSXhNakFpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaVB2Q2ZrTGM4TDNSbGVIUStQQzl6ZG1jK0NnPT0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0K">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjMyIiBmaWxsPSIjMzMyYzNkIi8+PHRleHQgeD0iOTYiIHk9IjExOCIgZm9udC1zaXplPSIxMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfkLc8L3RleHQ+PC9zdmc+Cg==">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjMyIiBmaWxsPSIjMzMyYzNkIi8+PHRleHQgeD0iOTYiIHk9IjExOCIgZm9udC1zaXplPSIxMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCfkLc8L3RleHQ+PC9zdmc+Cg==">
 <style>
   :root{
     --room-a:#1b1720;
@@ -37,6 +45,9 @@
   .room{
     width:100%;
     max-width:720px;
+  }
+  :fullscreen .room, :-webkit-full-screen .room{
+    max-width:min(96vw, 96vh * 1.9);
   }
 
   .cabinet{
@@ -572,7 +583,16 @@
     knives.push({ x: W + 40, y:y, speed: scrollSpeed + 220 });
   }
 
+  function goFullscreen(){
+    try{
+      var el = document.documentElement;
+      var req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+      if(req) req.call(el).catch(function(){});
+    }catch(e){}
+  }
+
   function startGame(){
+    goFullscreen();
     resetGame();
     state = "playing";
     startOverlay.classList.add("hidden");
