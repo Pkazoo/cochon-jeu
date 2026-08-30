@@ -165,6 +165,62 @@
   }
   .final-score span, .high-score span{ color:var(--marquee-gold); font-weight:800; font-size:19px; }
 
+  .pseudo-input{
+    display:block;
+    width:100%;
+    max-width:220px;
+    margin:14px auto 0;
+    padding:10px 14px;
+    border-radius:999px;
+    border:1px solid #48405a;
+    background:#241f2c;
+    color:var(--ink-light);
+    font-size:14px;
+    text-align:center;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.5);
+  }
+  .pseudo-input::placeholder{ color:#6f6580; }
+  .pseudo-input:focus{ outline:2px solid var(--marquee-gold); outline-offset:1px; }
+
+  .leaderboard{
+    margin:14px 0 0;
+    background:var(--led-black);
+    border-radius:10px;
+    padding:10px 16px;
+    box-shadow:inset 0 2px 6px rgba(0,0,0,0.8);
+    max-height:150px;
+    overflow-y:auto;
+  }
+  .leaderboard-title{
+    display:block;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#5b7d68;
+    margin-bottom:6px;
+  }
+  #leaderboardList{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .leaderboard-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    font-family:ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric:tabular-nums;
+    font-size:13px;
+    color:var(--led-green);
+  }
+  .leaderboard-row .rank{ width:1.4em; color:#5b7d68; }
+  .leaderboard-row .lb-name{ flex:1; text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .leaderboard-row .lb-score{ font-weight:700; }
+  .leaderboard-row.current{ color:var(--marquee-gold); text-shadow:0 0 8px rgba(244,197,66,0.5); }
+
   .coin-btn{
     margin-top:14px;
     border:none;
@@ -286,6 +342,7 @@
             Le cochon reste sur place, c'est le décor qui défile devant lui.<br>
             Utilise <kbd>↑</kbd> et <kbd>↓</kbd> pour changer sa hauteur et attraper les épis 🌽 qui arrivent.
           </p>
+          <input type="text" id="pseudoInput" class="pseudo-input" maxlength="12" placeholder="Ton pseudo" autocomplete="off">
           <button id="startBtn" class="coin-btn">Insérer une pièce ▶</button>
           <p class="hint">ou appuie sur Espace &middot; Échap pour arrêter en cours de partie</p>
         </div>
@@ -308,6 +365,10 @@
           <h1 id="gameoverTitle">Temps écoulé !</h1>
           <p class="final-score">Score : <span id="finalScore">0</span></p>
           <p class="high-score">Record : <span id="finalHigh">0</span></p>
+          <div class="leaderboard">
+            <span class="leaderboard-title">Classement</span>
+            <ol id="leaderboardList"></ol>
+          </div>
           <button id="restartBtn" class="coin-btn">Rejouer ▶</button>
           <p class="hint">ou appuie sur Espace</p>
         </div>
@@ -349,9 +410,50 @@
   var finalHigh = document.getElementById("finalHigh");
   var gameoverTitle = document.getElementById("gameoverTitle");
   var pauseScore = document.getElementById("pauseScore");
+  var pseudoInput = document.getElementById("pseudoInput");
+  var leaderboardList = document.getElementById("leaderboardList");
 
   var HIGH_KEY = "cochonMangeMaisHighScore";
   var highScore = parseInt(localStorage.getItem(HIGH_KEY) || "0", 10);
+
+  var PSEUDO_KEY = "cochonMangeMaisPseudo";
+  var LEADERBOARD_KEY = "cochonMangeMaisLeaderboard";
+  pseudoInput.value = localStorage.getItem(PSEUDO_KEY) || "";
+  var currentPseudo = "Cochon";
+
+  function getLeaderboard(){
+    try{
+      var list = JSON.parse(localStorage.getItem(LEADERBOARD_KEY));
+      return Array.isArray(list) ? list : [];
+    }catch(e){ return []; }
+  }
+
+  function renderLeaderboard(board, thisName, thisScore){
+    leaderboardList.innerHTML = "";
+    var highlighted = false;
+    for(var i=0; i<board.length; i++){
+      var entry = board[i];
+      var li = document.createElement("li");
+      li.className = "leaderboard-row";
+      if(!highlighted && entry.name === thisName && entry.score === thisScore){
+        li.className += " current";
+        highlighted = true;
+      }
+      var rank = document.createElement("span");
+      rank.className = "rank";
+      rank.textContent = (i+1) + ".";
+      var name = document.createElement("span");
+      name.className = "lb-name";
+      name.textContent = entry.name;
+      var sc = document.createElement("span");
+      sc.className = "lb-score";
+      sc.textContent = entry.score;
+      li.appendChild(rank);
+      li.appendChild(name);
+      li.appendChild(sc);
+      leaderboardList.appendChild(li);
+    }
+  }
 
   var MARGIN_TOP = 65, MARGIN_BOTTOM = 65;
   var GAME_DURATION = 60;
@@ -559,7 +661,10 @@
   }
 
   function startGame(){
+    pseudoInput.blur();
     goFullscreen();
+    currentPseudo = pseudoInput.value.trim().slice(0, 12) || "Cochon";
+    localStorage.setItem(PSEUDO_KEY, currentPseudo);
     resetGame();
     state = "playing";
     startOverlay.classList.add("hidden");
@@ -578,6 +683,14 @@
     gameoverTitle.textContent = title || "Temps écoulé !";
     finalScore.textContent = String(score);
     finalHigh.textContent = String(highScore);
+
+    var board = getLeaderboard();
+    board.push({ name: currentPseudo, score: score });
+    board.sort(function(a, b){ return b.score - a.score; });
+    board = board.slice(0, 10);
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board));
+    renderLeaderboard(board, currentPseudo, score);
+
     gameoverOverlay.classList.remove("hidden");
     beep(220, 0.3, "sawtooth", 0.05);
     stopMusic();
@@ -610,6 +723,7 @@
   }
 
   window.addEventListener("keydown", function(e){
+    if(e.target === pseudoInput) return;
     if(e.code === "ArrowUp"){ keys.up = true; e.preventDefault(); }
     if(e.code === "ArrowDown"){ keys.down = true; e.preventDefault(); }
     if(e.code === "Space"){
@@ -627,6 +741,9 @@
     if(e.code === "ArrowDown") keys.down = false;
   });
 
+  pseudoInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); startGame(); }
+  });
   document.getElementById("startBtn").addEventListener("click", startGame);
   document.getElementById("restartBtn").addEventListener("click", startGame);
   document.getElementById("resumeBtn").addEventListener("click", resumeGame);
